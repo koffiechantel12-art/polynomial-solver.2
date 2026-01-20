@@ -284,9 +284,8 @@ def render_history():
         show_all = st.checkbox("Show all users' history", value=False, key="admin_show_all")
     rows = get_history(
         supabase,
-        None if show_all else st.session_state.user["email"]
+        None if show_all else st.session_state.user["username"]
     )
-
     if rows:
         df = pd.DataFrame(rows, columns=["id","username","expression","roots","timestamp"])
         st.dataframe(df, use_container_width=True)
@@ -413,6 +412,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
