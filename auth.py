@@ -1,7 +1,9 @@
-import sqlite3, hashlib, os, re
+import hashlib, os, re
 from datetime import datetime
+import streamlit as st
+import psycopg2
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")
+
 PASSWORD_EXPIRY_DAYS = 90
 
 def _conn():
@@ -342,3 +344,4 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
