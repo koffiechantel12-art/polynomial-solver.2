@@ -22,7 +22,7 @@ def is_strong_password(password: str):
     return True, ""
 
 
-init_db()
+#init_db()
 inject_base_css()
 st.set_page_config(page_title="Polynomial Solver", layout="centered")
 st.set_page_config(
@@ -432,3 +432,4 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
