@@ -186,13 +186,31 @@ def verify_user(identifier, password):
 
 
 def get_user(identifier):
-    conn = _conn(); c = conn.cursor()
-    c.execute("SELECT username,is_admin,recovery_q,recovery_a,must_set_recovery,phone FROM users WHERE username=%s OR phone=%s
- ", (identifier, identifier))
-    row = c.fetchone(); conn.close()
+    conn = _conn()
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT username, is_admin, recovery_q, recovery_a, must_set_recovery, phone
+        FROM users
+        WHERE username = %s OR phone = %s
+        """,
+        (identifier, identifier)
+    )
+    row = c.fetchone()
+    conn.close()
+
     if not row:
         return None
-    return {"username": row[0], "is_admin": bool(row[1]), "recovery_q": row[2], "recovery_a": row[3], "must_set_recovery": bool(row[4]), "phone": row[5]}
+
+    return {
+        "username": row[0],
+        "is_admin": bool(row[1]),
+        "recovery_q": row[2],
+        "recovery_a": row[3],
+        "must_set_recovery": bool(row[4]),
+        "phone": row[5],
+    }
+
 
 def list_users():
     conn = _conn(); c = conn.cursor()
@@ -345,5 +363,6 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
