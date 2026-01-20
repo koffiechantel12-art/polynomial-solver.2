@@ -75,25 +75,25 @@ def render_account():
     st.header("Sign In")
     username = st.text_input("Username", key="login_user")
     password = st.text_input("Password", type="password", key="login_pw")
-   if st.button("Sign In"):
-    try:
-        res = supabase.auth.sign_in_with_password({
-            "email": username,
-            "password": password
-        })
-
-        if res.user:
-            st.session_state.user = {
-                "id": res.user.id,
-                "email": res.user.email,
-                "is_admin": False
-            }
-            safe_rerun()
-        else:
-            st.error("Login failed.")
-
-    except Exception as e:
-        st.error("Invalid credentials or Supabase error.")
+       if st.button("Sign In"):
+        try:
+            res = supabase.auth.sign_in_with_password({
+                "email": username,
+                "password": password
+            })
+    
+            if res.user:
+                st.session_state.user = {
+                    "id": res.user.id,
+                    "email": res.user.email,
+                    "is_admin": False
+                }
+                safe_rerun()
+            else:
+                st.error("Login failed.")
+    
+        except Exception as e:
+            st.error("Invalid credentials or Supabase error.")
 
 
 
@@ -404,6 +404,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
