@@ -71,8 +71,8 @@ def render_account():
     username = st.text_input("Username", key="login_user")
     password = st.text_input("Password", type="password", key="login_pw")
     if st.button("Sign In", disabled=st.session_state.login_in_progress):
-    st.warning("Supabase authentication not wired yet.")
-    return
+        st.warning("Supabase authentication not wired yet.")
+        return
 
 
     if not st.session_state.get("user"):
@@ -382,6 +382,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
