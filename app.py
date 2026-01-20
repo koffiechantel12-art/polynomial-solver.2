@@ -70,35 +70,9 @@ def render_account():
     st.header("Sign In")
     username = st.text_input("Username", key="login_user")
     password = st.text_input("Password", type="password", key="login_pw")
-    if st.button("Sign In", disabled=st.session_state.login_in_progress):
-        st.session_state.login_in_progress = True
-        result = verify_user(username, password)
-
-        if result == "EXPIRED":
-            st.warning("Your password has expired. Please create a new password.")
-            st.session_state.user = {"username": username}
-            st.session_state._view = "force_password_reset"
-            st.session_state.login_in_progress = False
-            safe_rerun()
-            return
-
-
-        if result:
-            detail = get_user(username)
-            st.session_state.user = {
-                "username": detail["username"],
-                "is_admin": detail["is_admin"],
-                "must_set_recovery": detail.get("must_set_recovery", False)
-            }
-            st.session_state.login_in_progress = False
-            st.session_state._view = None
-            safe_rerun()
-            return
-
-        else:
-            st.session_state.login_in_progress = False
-            st.error("Invalid credentials")
-
+   if st.button("Sign In", disabled=st.session_state.login_in_progress):
+    st.warning("Supabase authentication not wired yet.")
+    return
 
 
     if not st.session_state.get("user"):
@@ -136,32 +110,8 @@ def render_account():
             st.session_state["_view"] = None
             safe_rerun()
         if submit:
-            if not new_user or not new_pw or not confirm_pw:
-                st.error("Provide username, password, and confirmation.")
-            elif new_pw != confirm_pw:
-                st.error("Passwords do not match.")
-            is_valid, msg = is_strong_password(new_pw)
-            if not is_valid:
-                st.error(msg)
-                return
+            st.warning("Account creation is temporarily disabled. Authentication will be handled by Supabase.")
 
-            elif new_user == "ad":
-                st.error("This username is reserved.")
-            else:
-                ok = create_user(new_user, new_pw, rec_q or None, rec_a or None)
-                if ok:
-                    st.success("Account created. You may sign in now.")
-                    st.session_state["_view"] = None
-                    safe_rerun()
-                else:
-                    st.error("Create failed (username may already exist).")
-
-                if ok:
-                    st.success("Account created. You may sign in now.")
-                    st.session_state["_view"] = None
-                    safe_rerun()
-                else:
-                    st.error("Create failed (username may already exist).")
         st.markdown('</div></div>', unsafe_allow_html=True)
 
     if st.session_state.get("_view") == "recover":
@@ -432,6 +382,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
