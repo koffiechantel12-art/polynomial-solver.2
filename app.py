@@ -94,8 +94,7 @@ def render_account():
         
             except Exception as e:
                 st.error("Invalid credentials or Supabase error.")
-
-
+                return
 
     if not st.session_state.get("user"):
         left, right = st.columns(2)
@@ -404,6 +403,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
