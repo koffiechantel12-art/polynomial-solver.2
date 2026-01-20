@@ -73,7 +73,7 @@ st.title("Polynomial Solver")
 # -------- Account page (landing) --------
 def render_account():
     st.header("Sign In")
-    username = st.text_input("Username", key="login_user")
+    username = st.text_input("Email", key="login_user")
     password = st.text_input("Password", type="password", key="login_pw")
     if st.button("Sign In"):
         try:
@@ -402,6 +402,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
