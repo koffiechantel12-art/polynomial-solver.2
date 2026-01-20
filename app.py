@@ -6,6 +6,7 @@ from utils import plot_polynomial, fig_to_bytes, history_to_csv, poly_to_latex, 
 from ui import inject_base_css
 import numpy as np
 import pandas as pd
+from history_supabase import add_history, get_history
 import re
 from supabase import create_client
 supabase = create_client(
@@ -256,7 +257,13 @@ def render_solver():
                         root_items.append(f"({rtex})")
                 st.markdown("$$" + "\\; ,\\; ".join(root_items) + "$$")
                 # save history
-                add_history(st.session_state.user['username'], coeff_text, str([str(r) for r in roots]))
+                add_history(
+                    supabase,
+                    st.session_state.user["email"],
+                    coeff_text,
+                    str([str(r) for r in roots])
+                )
+
                 # downloads
                 png = fig_to_bytes(fig, 'png')
                 jpg = fig_to_bytes(fig, 'jpg')
@@ -275,7 +282,11 @@ def render_history():
     show_all = False
     if st.session_state.user.get('is_admin'):
         show_all = st.checkbox("Show all users' history", value=False, key="admin_show_all")
-    rows = get_history(None if show_all else st.session_state.user['username'])
+    rows = get_history(
+        supabase,
+        None if show_all else st.session_state.user["email"]
+    )
+
     if rows:
         df = pd.DataFrame(rows, columns=["id","username","expression","roots","timestamp"])
         st.dataframe(df, use_container_width=True)
@@ -402,6 +413,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
