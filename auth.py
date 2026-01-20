@@ -53,6 +53,7 @@ def is_password_expired(password_last_changed):
 def hash_pw(pw):
     return hashlib.sha256(pw.encode('utf-8')).hexdigest()
 
+
 def create_user(username, password, recovery_q=None, recovery_a=None, phone=None):
     conn = _conn()
     c = conn.cursor()
@@ -330,6 +331,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
 
