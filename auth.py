@@ -13,7 +13,9 @@ def _conn():
         user=st.secrets["SUPABASE_DB_USER"],
         password=st.secrets["SUPABASE_DB_PASSWORD"],
         port=st.secrets["SUPABASE_DB_PORT"],
+        sslmode="require",
     )
+
 
 
 def init_db():
@@ -338,6 +340,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
 
