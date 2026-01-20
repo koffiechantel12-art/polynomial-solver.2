@@ -7,7 +7,7 @@ import psycopg2
 PASSWORD_EXPIRY_DAYS = 90
 
 def _conn():
-    return sqlite3.connect(DB_PATH, check_same_thread=False)
+    return psycopg2.connect(st.secrets["DB_URL"])
 
 def init_db():
     conn = _conn(); c = conn.cursor()
@@ -104,7 +104,7 @@ def create_user(username, password, recovery_q=None, recovery_a=None, phone=None
                 created_at, password_last_changed,
                 must_set_recovery, phone
             )
-            VALUES (?,?,?,?,?,?,?,?)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             username,
             hash_pw(password),
@@ -165,7 +165,7 @@ def verify_user(identifier, password):
     c.execute("""
         SELECT username, password, is_admin, password_last_changed
         FROM users
-        WHERE username=? OR phone=?
+       WHERE username=%s OR phone=%s
     """, (identifier, identifier))
 
     row = c.fetchone()
@@ -187,7 +187,8 @@ def verify_user(identifier, password):
 
 def get_user(identifier):
     conn = _conn(); c = conn.cursor()
-    c.execute("SELECT username,is_admin,recovery_q,recovery_a,must_set_recovery,phone FROM users WHERE username=? OR phone=?", (identifier, identifier))
+    c.execute("SELECT username,is_admin,recovery_q,recovery_a,must_set_recovery,phone FROM users WHERE username=%s OR phone=%s
+ ", (identifier, identifier))
     row = c.fetchone(); conn.close()
     if not row:
         return None
@@ -212,7 +213,7 @@ def delete_user(username):
     if username == "ad":
         return False
     conn = _conn(); c = conn.cursor()
-    c.execute("DELETE FROM users WHERE username=?", (username,))
+    c.execute("DELETE FROM users WHERE username=%s", (username,))
     changed = conn.total_changes
     conn.commit(); conn.close()
     return changed > 0
@@ -253,13 +254,13 @@ def recover_password(username, answer, new_password):
 
 def add_history(username, expression, roots):
     conn = _conn(); c = conn.cursor()
-    c.execute("INSERT INTO history(username,expression,roots) VALUES(?,?,?)", (username, expression, roots))
+    c.execute("INSERT INTO history(username,expression,roots) VALUES(%s,%s,%s)", (username, expression, roots))
     conn.commit(); conn.close()
 
 def get_history(username=None):
     conn = _conn(); c = conn.cursor()
     if username:
-        c.execute("SELECT id,username,expression,roots,timestamp FROM history WHERE username=? ORDER BY timestamp DESC", (username,))
+        c.execute("SELECT id,username,expression,roots,timestamp FROM history WHERE username=%s ORDER BY timestamp DESC", (username,))
     else:
         c.execute("SELECT id,username,expression,roots,timestamp FROM history ORDER BY timestamp DESC")
     rows = c.fetchall(); conn.close()
@@ -344,4 +345,5 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
