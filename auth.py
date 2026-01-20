@@ -263,7 +263,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		if mode in ('substring', 'prefix', 'tokens'):
 			if mode == 'substring':
 				pattern = f"%{query}%"
-				sql = "SELECT username,phone,is_admin,created_at FROM users WHERE (username LIKE ? OR phone LIKE ?)"+coll+" ORDER BY username LIMIT ?"
+				sql = "SELECT username,phone,is_admin,created_at FROM users WHERE (username LIKE %s OR phone LIKE %s)"
 				params = [pattern, pattern, limit]
 				if is_admin is not None:
 					sql = sql.replace(" LIMIT ?", " AND is_admin=? LIMIT ?")
@@ -330,6 +330,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
 
