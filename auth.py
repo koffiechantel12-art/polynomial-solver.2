@@ -140,7 +140,7 @@ def admin_create_user(username, password, phone=None):
                 created_at, password_last_changed,
                 must_set_recovery, phone
             )
-            VALUES (?,?,?,?,?,?)
+            VALUES (%s,%s,%s,%s,%s,%s)
         """, (
             username,
             hash_pw(password),
@@ -221,7 +221,7 @@ def list_users():
 
 def search_users(q):
     conn = _conn(); c = conn.cursor()
-    c.execute("SELECT username,is_admin FROM users WHERE username LIKE ? ORDER BY username LIMIT 200", (f"%{q}%",))
+    c.execute("SELECT username,is_admin FROM users WHERE username LIKE %s ORDER BY username LIMIT 200", (f"%{q}%",))
     users = [{"username": r[0], "is_admin": bool(r[1])} for r in c.fetchall()]
     conn.close()
     return users
@@ -238,7 +238,7 @@ def delete_user(username):
 
 def set_recovery(username, question, answer):
     conn = _conn(); c = conn.cursor()
-    c.execute("UPDATE users SET recovery_q=?, recovery_a=?, must_set_recovery=0 WHERE username=?", (question, hash_pw(answer), username))
+    c.execute("UPDATE users SET recovery_q=%s, recovery_a=%s, must_set_recovery=0 WHERE username=%s", (question, hash_pw(answer), username))
     conn.commit(); ok = c.rowcount > 0
     conn.close()
     return ok
@@ -247,7 +247,7 @@ def recover_password(username, answer, new_password):
     conn = _conn()
     c = conn.cursor()
 
-    c.execute("SELECT recovery_a FROM users WHERE username=?", (username,))
+    c.execute("SELECT recovery_a FROM users WHERE username=%s", (username,))
     row = c.fetchone()
     if not row or not row[0]:
         conn.close()
@@ -260,8 +260,8 @@ def recover_password(username, answer, new_password):
     now = datetime.utcnow().isoformat()
     c.execute("""
         UPDATE users
-        SET password=?, password_last_changed=?, password_expired=0
-        WHERE username=?
+        SET password=%s, password_last_changed=%s, password_expired=0
+        WHERE username=%s
     """, (hash_pw(new_password), now, username))
 
     conn.commit()
@@ -363,6 +363,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
 
