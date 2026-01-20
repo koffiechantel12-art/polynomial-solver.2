@@ -4,4 +4,6 @@ matplotlib
 pandas
 rapidfuzz
 psycopg2-binary
+supabase
+
 
