@@ -86,7 +86,7 @@ def render_account():
                 st.session_state.user = {
                     "id": res.user.id,
                     "email": res.user.email,
-                    "is_admin": False
+                    "is_admin": res.user.email == "ad@polynomial.local"
                 }
                 safe_rerun()
             else:
@@ -100,9 +100,8 @@ def render_account():
         left, right = st.columns(2)
         with left:
             st.markdown('<div class="card"><div class="form-title">Create account</div></div>', unsafe_allow_html=True)
-            if st.button("Create account"):
-                st.session_state._view = "signup"
-                safe_rerun()
+            st.info("Account creation is handled by the administrator.")
+
         with right:
             st.markdown('<div class="card"><div class="form-title">Forgot password</div></div>', unsafe_allow_html=True)
             if st.button("Forgot password"):
@@ -403,6 +402,7 @@ else:
 
 
 st.caption("If signed in, use the tabs to navigate to Solver / History / Admin.")
+
 
 
 
