@@ -7,15 +7,7 @@ import psycopg2
 PASSWORD_EXPIRY_DAYS = 90
 
 def _conn():
-    return psycopg2.connect(
-        host=st.secrets["SUPABASE_DB_HOST"],
-        database=st.secrets["SUPABASE_DB_NAME"],
-        user=st.secrets["SUPABASE_DB_USER"],
-        password=st.secrets["SUPABASE_DB_PASSWORD"],
-        port=st.secrets["SUPABASE_DB_PORT"],
-        sslmode="require",
-    )
-
+    return psycopg2.connect(st.secrets["DATABASE_URL"])
 
 
 def init_db():
@@ -340,6 +332,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
 
