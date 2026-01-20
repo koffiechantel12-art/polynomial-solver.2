@@ -10,69 +10,36 @@ def _conn():
     return psycopg2.connect(st.secrets["DB_URL"])
 
 def init_db():
-    conn = _conn(); c = conn.cursor()
-    # ensure base users table exists (minimal columns)
-    c.execute("""CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY,
-        username TEXT UNIQUE,
-        password TEXT,
-        is_admin INTEGER DEFAULT 0
-    )""")
-    # add any missing columns safely
-    c.execute("PRAGMA table_info(users)")
-    cols = [r[1] for r in c.fetchall()]
-    if "recovery_q" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN recovery_q TEXT")
-    if "recovery_a" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN recovery_a TEXT")
-    if "created_at" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN created_at DATETIME")
-        c.execute("UPDATE users SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL")
-    if "must_set_recovery" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN must_set_recovery INTEGER DEFAULT 0")
-        c.execute("UPDATE users SET must_set_recovery = 0 WHERE must_set_recovery IS NULL")
-    if "phone" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN phone TEXT")
-        try:
-            c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone_unique ON users(phone)")
-        except Exception:
-            pass
-    if "password_last_changed" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN password_last_changed TEXT")
-        c.execute(
-            "UPDATE users SET password_last_changed = created_at "
-            "WHERE password_last_changed IS NULL"
-        )
+    conn = _conn()
+    c = conn.cursor()
 
-    if "password_expired" not in cols:
-        c.execute("ALTER TABLE users ADD COLUMN password_expired INTEGER DEFAULT 0")
-        
-    
-    # ensure history table exists
-    c.execute("""CREATE TABLE IF NOT EXISTS history(
-        id INTEGER PRIMARY KEY, username TEXT, expression TEXT, roots TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )""")
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        is_admin BOOLEAN DEFAULT FALSE,
+        recovery_q TEXT,
+        recovery_a TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        must_set_recovery BOOLEAN DEFAULT FALSE,
+        phone TEXT UNIQUE,
+        password_last_changed TIMESTAMP,
+        password_expired BOOLEAN DEFAULT FALSE
+    )
+    """)
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS history (
+        id SERIAL PRIMARY KEY,
+        username TEXT,
+        expression TEXT,
+        roots TEXT,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
     conn.commit()
-
-    # ensure single admin account using environment variables (secure in deployment)
-    admin_user = os.environ.get("ADMIN_USERNAME", "ad")
-    admin_pw = os.environ.get("ADMIN_PASSWORD", "ad")
-    c.execute("SELECT 1 FROM users WHERE username=?", (admin_user,))
-    if not c.fetchone():
-        h = hashlib.sha256(admin_pw.encode('utf-8')).hexdigest()
-        now = datetime.utcnow().isoformat()
-        c.execute(
-            """
-            INSERT INTO users(
-                username, password, is_admin,
-                created_at, password_last_changed, must_set_recovery
-            )
-            VALUES (?,?,?,?,?,0)
-            """,
-            (admin_user, h, 1, now, now)
-        )
-        conn.commit()
-
     conn.close()
 
 
@@ -363,6 +330,7 @@ def advanced_search_users(query, mode='fuzzy', fuzzy_threshold=75, limit=200, is
 		return []
 	finally:
 		conn.close()
+
 
 
 
